@@ -1,4 +1,5 @@
 {
   "certifiedHardwareUrl": "https://vesio.blob.core.windows.net/releases/certified-hardware/aws.yml",
-  "awsRegionsFile": "regions.json"
+  "awsRegionsFile": "regions.json",
+  "mappingsFile": "mapping.json"
 }

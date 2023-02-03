@@ -31,11 +31,11 @@ var AwsType2GwTypeMap = map[string]string{
 	AwsByolMultiNicVoltmesh: IngressEgressGatewayType,
 }
 
-type EC2DescribeImagesAPI interface {
+/*type EC2DescribeImagesAPI interface {
 	DescribeImages(ctx context.Context,
 		params *ec2.DescribeImagesInput,
 		optFns ...func(*ec2.Options)) (*ec2.DescribeImagesOutput, error)
-}
+}*/
 
 type CertifiedHardware []byte
 type AvailableAwsImages []types.Image
@@ -196,6 +196,22 @@ func GetCertifiedHardwareList(requestURL string) (CertifiedHardware, error) {
 	return resBody, nil
 }
 
+func (m *MachineImages) Save(filename string) {
+	file, _ := json.MarshalIndent(m, "", "  ")
+	// f, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+	f, err := os.Create(filename)
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+
+	n, err1 := f.Write(file)
+	if err1 != nil {
+		panic(err)
+	}
+	fmt.Printf("Saved mapping data to %s. Wrote %d bytes\n", filename, n)
+}
+
 func DescribeAwsImages(region string) (AvailableAwsImages, error) {
 	cfg, err := config.LoadDefaultConfig(context.Background(), config.WithRegion(region))
 
@@ -287,6 +303,8 @@ func (r *CertifiedHardwareImages) Contains(mis MachineImages, dai AvailableAwsIm
 
 func main() {
 	argSettingsFile := os.Args[1]
+	argWriteMappingFile := os.Args[2]
+	argPrettyPrintMapping := os.Args[3]
 
 	var settings Settings
 	err := settings.loadSettings(argSettingsFile)
@@ -335,8 +353,14 @@ func main() {
 		fmt.Printf("Create mapping for region: %s --> Done\n", region.RegionName)
 	}
 
-	err = PrettyPrint(mis)
-	if err != nil {
-		return
+	if argPrettyPrintMapping == "true" {
+		err = PrettyPrint(mis)
+		if err != nil {
+			return
+		}
+	}
+
+	if argWriteMappingFile == "true" {
+		mis.Save("mapping.json")
 	}
 }
