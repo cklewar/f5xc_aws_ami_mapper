@@ -3,15 +3,21 @@
 Mapper tool generates mapping between F5XC gateway types and latest publicly available AWS AMIs for later consumption in
 for example Terraform.
 
-## Usage
+## Command line arguments
 
-### Positional command line arguments
+```bash
+go run main.go --help
+  -print
+        Print mapping in stdout
+  -settings string
+        The settings file to use
+  -writeHcl
+        Write mapping hcl file
+  -writeJson
+        Write mapping json file
+```
 
-1. Argument points to `settings` file to use
-2. Argument `WriteMappingFile`. If set to `true` writes json data to file. Filename take from `settings` file
-3. Argument `PrettyPrintMapping`. If set to `true` prints json data to stdout
-
-### Settings file
+## Settings file
 
 - `certifiedHardwareUrl` most current certified hardware list
 - `awsRegionsFile` region file to obtain list of AWS regions from
@@ -21,14 +27,13 @@ for example Terraform.
 {
   "certifiedHardwareUrl": "https://vesio.blob.core.windows.net/releases/certified-hardware/aws.yml",
   "awsRegionsFile": "regions.json",
-  "mappingsFile": "mapping.json"
+  "mappingsFile": "mapping.json",
+  "templateFile": "machine_images.tpl",
+  "machineImagesFile": "machine_images.tf"
 }
 ```
 
-### Run
-
-Example points to settings file `settings.json` in current directory and saves json data to given file set in settings
-and prints json data to stdout.
+## Usage
 
 Clone this repository and change into repository directory
 
@@ -36,11 +41,16 @@ Clone this repository and change into repository directory
 git clone https://github.com/cklewar/f5xc_aws_ami_mapper
 ```
 
+### Export - JSON
+
+Example points to settings file `settings.json` in current directory and saves json data to given file set in settings
+file.
+
 ```bash
-go run main.go settings.json
+go run main.go -settings settings.json -writeJson true
 ```
 
-## Example output
+#### Example output
 
 ```bash
 Successfully opened settings.json
@@ -78,4 +88,120 @@ Create mapping for region: eu-west-3 --> Done
       "creationDate": ""
     },
 ....truncated
+```
+
+### Export - HCL
+
+Example points to settings file `settings.json` in current directory and saves hcl data to given file set in settings
+file.
+
+```bash
+go run main.go -settings settings.json -writeHcl true
+```
+
+#### Example output
+
+```hcl
+variable "f5xc_ce_machine_image" {
+  type = object({
+    ingress_gateway = object({
+      af-south-1     = string
+      ap-east-1      = string
+      ap-northeast-1 = string
+      ap-northeast-2 = string
+      ap-northeast-3 = string
+      ap-south-1     = string
+      ap-southeast-1 = string
+      ap-southeast-2 = string
+      ap-southeast-3 = string
+      ca-central-1   = string
+      eu-central-1   = string
+      eu-north-1     = string
+      eu-south-1     = string
+      eu-west-1      = string
+      eu-west-2      = string
+      eu-west-3      = string
+      me-south-1     = string
+      sa-east-1      = string
+      us-east-1      = string
+      us-east-2      = string
+      us-west-1      = string
+      us-west-2      = string
+    })
+    ingress_egress_gateway = object({
+      af-south-1     = string
+      ap-east-1      = string
+      ap-northeast-1 = string
+      ap-northeast-2 = string
+      ap-northeast-3 = string
+      ap-south-1     = string
+      ap-southeast-1 = string
+      ap-southeast-2 = string
+      ap-southeast-3 = string
+      ca-central-1   = string
+      eu-central-1   = string
+      eu-north-1     = string
+      eu-south-1     = string
+      eu-west-1      = string
+      eu-west-2      = string
+      eu-west-3      = string
+      me-south-1     = string
+      sa-east-1      = string
+      us-east-1      = string
+      us-east-2      = string
+      us-west-1      = string
+      us-west-2      = string
+    })
+  })
+  default = {
+    ingress_gateway = {
+      af-south-1     = "ami-0bcfb554a48878b52"
+      ap-east-1      = "ami-03cf35954fb9084fc"
+      ap-northeast-1 = "ami-07dac882268159d52"
+      ap-northeast-2 = "ami-04f6d5781039d2f88"
+      ap-northeast-3 = ""
+      ap-south-1     = "ami-099c0c7e19e1afd16"
+      ap-southeast-1 = "ami-0dba294abe676bd58"
+      ap-southeast-2 = "ami-0ae68f561b7d20682"
+      ap-southeast-3 = "ami-065fc7b0f6ec02011"
+      ca-central-1   = "ami-0ddc009ae69986eb4"
+      eu-central-1   = "ami-027625cb269f5d7e9"
+      eu-north-1     = "ami-0366c929eb2ac407b"
+      eu-south-1     = "ami-00cb6474298a310af"
+      eu-west-1      = "ami-01baaca2a3b1b0114"
+      eu-west-2      = "ami-05f5a414a42961df6"
+      eu-west-3      = "ami-0e1361351f9205511"
+      me-south-1     = "ami-0fb5db9d908d231c3"
+      sa-east-1      = "ami-09082c4758ef6ec36"
+      us-east-1      = "ami-0f94aee77d07b0094"
+      us-east-2      = "ami-0660aaf7b6edaa980"
+      us-west-1      = "ami-0cf44e35e2aecacb4"
+      us-west-2      = "ami-0cba83d31d405a8f5"
+    }
+    ingress_egress_gateway = {
+      af-south-1     = "ami-0bcfb554a48878b52"
+      ap-east-1      = "ami-03cf35954fb9084fc"
+      ap-northeast-1 = "ami-07dac882268159d52"
+      ap-northeast-2 = "ami-04f6d5781039d2f88"
+      ap-northeast-3 = ""
+      ap-south-1     = "ami-099c0c7e19e1afd16"
+      ap-southeast-1 = "ami-0dba294abe676bd58"
+      ap-southeast-2 = "ami-0ae68f561b7d20682"
+      ap-southeast-3 = "ami-065fc7b0f6ec02011"
+      ca-central-1   = "ami-0ddc009ae69986eb4"
+      eu-central-1   = "ami-027625cb269f5d7e9"
+      eu-north-1     = "ami-0366c929eb2ac407b"
+      eu-south-1     = "ami-00cb6474298a310af"
+      eu-west-1      = "ami-01baaca2a3b1b0114"
+      eu-west-2      = "ami-05f5a414a42961df6"
+      eu-west-3      = "ami-0e1361351f9205511"
+      me-south-1     = "ami-0fb5db9d908d231c3"
+      sa-east-1      = "ami-09082c4758ef6ec36"
+      us-east-1      = "ami-0f94aee77d07b0094"
+      us-east-2      = "ami-0660aaf7b6edaa980"
+      us-west-1      = "ami-0cf44e35e2aecacb4"
+      us-west-2      = "ami-0cba83d31d405a8f5"
+    }
+  }
+}
 ```
