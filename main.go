@@ -8,7 +8,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"gopkg.in/yaml.v3"
 	"io"
 	"net/http"
@@ -198,8 +197,9 @@ func GetCertifiedHardwareList(requestURL string) (CertifiedHardware, error) {
 	return resBody, nil
 }
 
-func DescribeAwsImages() (AvailableAwsImages, error) {
-	cfg, err := config.LoadDefaultConfig(context.Background())
+func DescribeAwsImages(region string) (AvailableAwsImages, error) {
+	cfg, err := config.LoadDefaultConfig(context.Background(), config.WithRegion(region))
+
 	if err != nil {
 		fmt.Println("configuration error: " + err.Error())
 		return nil, err
@@ -260,6 +260,7 @@ func (r *CertifiedHardwareImages) Contains(mis MachineImages, dai AvailableAwsIm
 
 	for _, availableAwsImage := range dai {
 		for _, certifiedHardwareImageId := range r.CertifiedHardware.AwsByolMultiNicVoltmesh.Aws.ImageID {
+
 			_, err := build(&currentIngressEgressMachineImage, certifiedHardwareImageId, AvailableAwsImage(availableAwsImage), region)
 			if err != nil {
 				return nil, err
@@ -272,6 +273,7 @@ func (r *CertifiedHardwareImages) Contains(mis MachineImages, dai AvailableAwsIm
 				return nil, err
 			}
 		}
+
 	}
 
 	mis[AwsType2GwTypeMap[AwsByolMultiNicVoltmesh]][region] = make(map[string]string)
@@ -284,7 +286,8 @@ func (r *CertifiedHardwareImages) Contains(mis MachineImages, dai AvailableAwsIm
 	return mis, nil
 }
 
-func CreateAwsSession(region string) error {
+/*func CreateAwsSession(region string) error {
+
 	sess, err := session.NewSession(&aws.Config{Region: aws.String(region)})
 	if err != nil {
 		fmt.Printf("Got an error in creating session: %s\n", err.Error())
@@ -292,13 +295,14 @@ func CreateAwsSession(region string) error {
 	}
 
 	_, err = sess.Config.Credentials.Get()
+	sess.
 	if err != nil {
 		fmt.Printf("Session credentials not found: %s\n", err.Error())
 		return err
 	}
 
 	return nil
-}
+}*/
 
 func main() {
 	argSettingsFile := os.Args[1]
@@ -340,13 +344,13 @@ func main() {
 
 	for _, region := range r.Regions { //for _, region := range regions {
 		fmt.Printf("Create mapping for region: %s\n", region.RegionName)
-		err := CreateAwsSession(region.RegionName)
+		// err := CreateAwsSession(region.RegionName)
 		// err := CreateAwsSession(region)
 		if err != nil {
 			os.Exit(1)
 		}
 
-		dai, err1 := DescribeAwsImages()
+		dai, err1 := DescribeAwsImages(region.RegionName)
 		if err1 != nil {
 			os.Exit(1)
 		}
@@ -358,6 +362,26 @@ func main() {
 		}
 		fmt.Printf("Create mapping for region: %s --> Done\n", region.RegionName)
 	}
+
+	/*err = CreateAwsSession("us-west-2")
+	if err != nil {
+		os.Exit(1)
+	}*/
+
+	/*dai, err1 := DescribeAwsImages("us-west-2")
+	if err1 != nil {
+		os.Exit(1)
+	}
+
+	for _, i := range certifiedHardwareImages.CertifiedHardware.AwsByolVoltmesh.Aws.ImageID {
+		// fmt.Println(i)
+		for _, j := range dai {
+			// fmt.Println(aws.StringValue(j.ImageId))
+			if aws.StringValue(j.ImageId) == i {
+				fmt.Println("MATCH:", aws.StringValue(j.ImageId), "==", i)
+			}
+		}
+	}*/
 
 	err = PrettyPrint(mis)
 	if err != nil {
