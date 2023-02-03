@@ -48,40 +48,28 @@ Create mapping for region: eu-north-1
 Create mapping for region: eu-north-1 --> Done
 Create mapping for region: eu-west-3
 Create mapping for region: eu-west-3 --> Done
-Create mapping for region: eu-south-1
-Create mapping for region: eu-south-1 --> Done
-Create mapping for region: eu-west-2
-Create mapping for region: eu-west-2 --> Done
-Create mapping for region: eu-west-1
-Create mapping for region: eu-west-1 --> Done
-Create mapping for region: ap-northeast-3
-Create mapping for region: ap-northeast-3 --> Done
-Create mapping for region: ap-northeast-2
-Create mapping for region: ap-northeast-2 --> Done
-Create mapping for region: me-south-1
-Create mapping for region: me-south-1 --> Done
-Create mapping for region: ap-northeast-1
-Create mapping for region: ap-northeast-1 --> Done
-Create mapping for region: ca-central-1
-Create mapping for region: ca-central-1 --> Done
-Create mapping for region: sa-east-1
-Create mapping for region: sa-east-1 --> Done
-Create mapping for region: ap-east-1
-Create mapping for region: ap-east-1 --> Done
-Create mapping for region: ap-southeast-1
-Create mapping for region: ap-southeast-1 --> Done
-Create mapping for region: ap-southeast-2
-Create mapping for region: ap-southeast-2 --> Done
-Create mapping for region: eu-central-1
-Create mapping for region: eu-central-1 --> Done
-Create mapping for region: ap-southeast-3
-Create mapping for region: ap-southeast-3 --> Done
-Create mapping for region: us-east-1
-Create mapping for region: us-east-1 --> Done
-Create mapping for region: us-east-2
-Create mapping for region: us-east-2 --> Done
-Create mapping for region: us-west-1
-Create mapping for region: us-west-1 --> Done
-Create mapping for region: us-west-2
-Create mapping for region: us-west-2 --> Done
+....truncated 
+{
+  "ingress_egress_gateway": {
+    "af-south-1": {
+      "ami": "ami-0c22728f79f714ed1",
+      "creationDate": "2022-07-01T11:27:36.000Z"
+    },
+    "ap-east-1": {
+      "ami": "ami-0a6cf3665c0612f91",
+      "creationDate": "2022-07-01T11:27:36.000Z"
+    },
+    "ap-northeast-1": {
+      "ami": "ami-0384d075a36447e2a",
+      "creationDate": "2022-07-01T11:27:35.000Z"
+    },
+    "ap-northeast-2": {
+      "ami": "ami-01472d819351faf92",
+      "creationDate": "2022-07-01T11:27:36.000Z"
+    },
+    "ap-northeast-3": {
+      "ami": "",
+      "creationDate": ""
+    },
+....truncated
 ```
