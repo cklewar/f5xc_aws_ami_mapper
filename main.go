@@ -16,12 +16,11 @@ import (
 )
 
 // const Version = "0.0.1"
+
 const Owner = "434481986642"
 const AwsByolVoltstackCombo = "AwsByolVoltstackCombo"
 const AwsByolMultiNicVoltmesh = "AwsByolMultiNicVoltmesh"
 const AwsByolVoltmesh = "AwsByolVoltmesh"
-
-// const timeParseLayout = "2006-01-02 15:04:05 +0000 UTC"
 const IngressGatewayType = "ingress_gateway"
 const IngressEgressGatewayType = "ingress_egress_gateway"
 const IngressEgressGatewayVolstackType = "ingress_egress_voltstack_gateway"
@@ -286,24 +285,6 @@ func (r *CertifiedHardwareImages) Contains(mis MachineImages, dai AvailableAwsIm
 	return mis, nil
 }
 
-/*func CreateAwsSession(region string) error {
-
-	sess, err := session.NewSession(&aws.Config{Region: aws.String(region)})
-	if err != nil {
-		fmt.Printf("Got an error in creating session: %s\n", err.Error())
-		return err
-	}
-
-	_, err = sess.Config.Credentials.Get()
-	sess.
-	if err != nil {
-		fmt.Printf("Session credentials not found: %s\n", err.Error())
-		return err
-	}
-
-	return nil
-}*/
-
 func main() {
 	argSettingsFile := os.Args[1]
 
@@ -335,17 +316,9 @@ func main() {
 	mis[IngressGatewayType] = make(map[string]map[string]string)
 	mis[IngressEgressGatewayType] = make(map[string]map[string]string)
 	mis[IngressEgressGatewayVolstackType] = make(map[string]map[string]string)
-	/*var regions = []string{
-		"us-west-1",
-		//"us-west-2",
-		"eu-central-1",
-		"ap-southeast-1",
-	}*/
 
 	for _, region := range r.Regions { //for _, region := range regions {
 		fmt.Printf("Create mapping for region: %s\n", region.RegionName)
-		// err := CreateAwsSession(region.RegionName)
-		// err := CreateAwsSession(region)
 		if err != nil {
 			os.Exit(1)
 		}
@@ -356,32 +329,11 @@ func main() {
 		}
 
 		_, err = certifiedHardwareImages.Contains(mis, dai, region.RegionName)
-		//_, err = certifiedHardwareImages.Contains(mis, dai, region)
 		if err != nil {
 			os.Exit(1)
 		}
 		fmt.Printf("Create mapping for region: %s --> Done\n", region.RegionName)
 	}
-
-	/*err = CreateAwsSession("us-west-2")
-	if err != nil {
-		os.Exit(1)
-	}*/
-
-	/*dai, err1 := DescribeAwsImages("us-west-2")
-	if err1 != nil {
-		os.Exit(1)
-	}
-
-	for _, i := range certifiedHardwareImages.CertifiedHardware.AwsByolVoltmesh.Aws.ImageID {
-		// fmt.Println(i)
-		for _, j := range dai {
-			// fmt.Println(aws.StringValue(j.ImageId))
-			if aws.StringValue(j.ImageId) == i {
-				fmt.Println("MATCH:", aws.StringValue(j.ImageId), "==", i)
-			}
-		}
-	}*/
 
 	err = PrettyPrint(mis)
 	if err != nil {
