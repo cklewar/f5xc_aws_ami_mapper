@@ -25,10 +25,16 @@ for example Terraform.
 }
 ```
 
-### Run example
+### Run
 
 Example points to settings file `settings.json` in current directory and saves json data to given file set in settings
 and prints json data to stdout.
+
+Clone this repository and change into repository directory
+
+```bash
+git clone https://github.com/cklewar/f5xc_aws_ami_mapper
+```
 
 ```bash
 go run main.go settings.json true true
