@@ -1,5 +1,7 @@
 {
   "certifiedHardwareUrl": "https://vesio.blob.core.windows.net/releases/certified-hardware/aws.yml",
   "awsRegionsFile": "regions.json",
-  "mappingsFile": "mapping.json"
+  "mappingsFile": "mapping.json",
+  "templateFile": "machine_images.tpl",
+  "machineImagesFile": "machine_images.tf"
 }

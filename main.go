@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
@@ -12,6 +13,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"text/template"
 	"time"
 )
 
@@ -30,6 +32,13 @@ var AwsType2GwTypeMap = map[string]string{
 	AwsByolVoltstackCombo:   IngressEgressGatewayVolstackType,
 	AwsByolMultiNicVoltmesh: IngressEgressGatewayType,
 }
+
+var (
+	settingsFile  = flag.String("settings", "", "The settings file to use")
+	writeJsonFile = flag.Bool("writeJson", false, "Write mapping json file")
+	writeHclFile  = flag.Bool("writeHcl", false, "Write mapping hcl file")
+	printMapping  = flag.Bool("print", false, "Print mapping in stdout")
+)
 
 /*type EC2DescribeImagesAPI interface {
 	DescribeImages(ctx context.Context,
@@ -51,6 +60,9 @@ type CurrentMachineImage struct {
 type Settings struct {
 	CertifiedHardwareUrl string `json:"certifiedHardwareUrl"`
 	AwsRegionsFile       string `json:"awsRegionsFile"`
+	MappingsFile         string `json:"mappingsFile""`
+	TemplateFile         string `json:"templateFile"`
+	MachineImagesFile    string `json:"machineImagesFile"`
 }
 
 type CertifiedHardwareImages struct {
@@ -196,9 +208,8 @@ func GetCertifiedHardwareList(requestURL string) (CertifiedHardware, error) {
 	return resBody, nil
 }
 
-func (m *MachineImages) Save(filename string) {
+func (m MachineImages) Save(filename string) {
 	file, _ := json.MarshalIndent(m, "", "  ")
-	// f, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 	f, err := os.Create(filename)
 	if err != nil {
 		panic(err)
@@ -210,6 +221,22 @@ func (m *MachineImages) Save(filename string) {
 		panic(err)
 	}
 	fmt.Printf("Saved mapping data to %s. Wrote %d bytes\n", filename, n)
+}
+
+func (m MachineImages) ExportMachineImages2Hcl(machineImageFile string, templateFile string) {
+	tpl := template.Must(template.ParseFiles(templateFile))
+
+	f, err := os.Create(machineImageFile)
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+
+	//err1 := tpl.Execute(os.Stdout, m)
+	err1 := tpl.Execute(f, m)
+	if err1 != nil {
+		fmt.Println(err1)
+	}
 }
 
 func DescribeAwsImages(region string) (AvailableAwsImages, error) {
@@ -302,12 +329,10 @@ func (r *CertifiedHardwareImages) Contains(mis MachineImages, dai AvailableAwsIm
 }
 
 func main() {
-	argSettingsFile := os.Args[1]
-	argWriteMappingFile := os.Args[2]
-	argPrettyPrintMapping := os.Args[3]
+	flag.Parse()
 
 	var settings Settings
-	err := settings.loadSettings(argSettingsFile)
+	err := settings.loadSettings(*settingsFile)
 	if err != nil {
 		os.Exit(1)
 	}
@@ -353,14 +378,15 @@ func main() {
 		fmt.Printf("Create mapping for region: %s --> Done\n", region.RegionName)
 	}
 
-	if argPrettyPrintMapping == "true" {
-		err = PrettyPrint(mis)
-		if err != nil {
-			return
-		}
+	if *writeHclFile {
+		mis.ExportMachineImages2Hcl(settings.MachineImagesFile, settings.TemplateFile)
 	}
 
-	if argWriteMappingFile == "true" {
-		mis.Save("mapping.json")
+	if *writeJsonFile {
+		mis.Save(settings.MappingsFile)
+	}
+
+	if *printMapping {
+		err = PrettyPrint(mis)
 	}
 }

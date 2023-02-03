@@ -37,7 +37,7 @@ git clone https://github.com/cklewar/f5xc_aws_ami_mapper
 ```
 
 ```bash
-go run main.go settings.json true true
+go run main.go settings.json
 ```
 
 ## Example output
