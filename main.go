@@ -226,13 +226,13 @@ func DescribeAwsImages() (AvailableAwsImages, error) {
 	return result.Images, err
 }
 
-func build(currentMachineImage CurrentMachineImage, certifiedHardwareImageId string, availableAwsImage AvailableAwsImage, region string) (CurrentMachineImage, error) {
+func build(currentMachineImage *CurrentMachineImage, certifiedHardwareImageId string, availableAwsImage AvailableAwsImage, region string) (CurrentMachineImage, error) {
 	if aws.StringValue(availableAwsImage.ImageId) == certifiedHardwareImageId {
-		if currentMachineImage == (CurrentMachineImage{}) {
+		if *currentMachineImage == (CurrentMachineImage{}) {
 			currentMachineImage.Ami = aws.StringValue(availableAwsImage.ImageId)
 			currentMachineImage.CreationDate = aws.StringValue(availableAwsImage.CreationDate)
 			currentMachineImage.Region = region
-		} else if currentMachineImage != (CurrentMachineImage{}) {
+		} else if *currentMachineImage != (CurrentMachineImage{}) {
 			currentDate, err := time.Parse(time.RFC3339, currentMachineImage.CreationDate)
 			if err != nil {
 				fmt.Println("current: ", err)
@@ -251,7 +251,7 @@ func build(currentMachineImage CurrentMachineImage, certifiedHardwareImageId str
 		}
 	}
 
-	return currentMachineImage, nil
+	return *currentMachineImage, nil
 }
 
 func (r *CertifiedHardwareImages) Contains(mis MachineImages, dai AvailableAwsImages, region string) (MachineImages, error) {
@@ -260,64 +260,17 @@ func (r *CertifiedHardwareImages) Contains(mis MachineImages, dai AvailableAwsIm
 
 	for _, availableAwsImage := range dai {
 		for _, certifiedHardwareImageId := range r.CertifiedHardware.AwsByolMultiNicVoltmesh.Aws.ImageID {
-			/*_, err := build(currentIngressEgressMachineImage, certifiedHardwareImageId, AvailableAwsImage(availableAwsImage), region)
+			_, err := build(&currentIngressEgressMachineImage, certifiedHardwareImageId, AvailableAwsImage(availableAwsImage), region)
 			if err != nil {
 				return nil, err
-			}*/
-			if aws.StringValue(availableAwsImage.ImageId) == certifiedHardwareImageId {
-				if currentIngressEgressMachineImage == (CurrentMachineImage{}) {
-					currentIngressEgressMachineImage.Ami = aws.StringValue(availableAwsImage.ImageId)
-					currentIngressEgressMachineImage.CreationDate = aws.StringValue(availableAwsImage.CreationDate)
-					currentIngressEgressMachineImage.Region = region
-				} else if currentIngressEgressMachineImage != (CurrentMachineImage{}) {
-					currentDate, err := time.Parse(time.RFC3339, currentIngressEgressMachineImage.CreationDate)
-					if err != nil {
-						fmt.Println("current: ", err)
-					}
-
-					candidateDate, err := time.Parse(time.RFC3339, aws.StringValue(availableAwsImage.CreationDate))
-					if err != nil {
-						fmt.Println("candidate: ", err)
-					}
-
-					if currentDate.Before(candidateDate) {
-						currentIngressEgressMachineImage.Ami = aws.StringValue(availableAwsImage.ImageId)
-						currentIngressEgressMachineImage.CreationDate = aws.StringValue(availableAwsImage.CreationDate)
-						currentIngressEgressMachineImage.Region = region
-					}
-				}
 			}
 		}
 
 		for _, certifiedHardwareImageId := range r.CertifiedHardware.AwsByolVoltmesh.Aws.ImageID {
-			cur, err := build(currentIngressMachineImage, certifiedHardwareImageId, AvailableAwsImage(availableAwsImage), region)
+			_, err := build(&currentIngressMachineImage, certifiedHardwareImageId, AvailableAwsImage(availableAwsImage), region)
 			if err != nil {
 				return nil, err
 			}
-			currentIngressMachineImage = cur
-			/*if aws.StringValue(availableAwsImage.ImageId) == certifiedHardwareImageId {
-				if currentIngressMachineImage == (CurrentMachineImage{}) {
-					currentIngressMachineImage.Ami = aws.StringValue(availableAwsImage.ImageId)
-					currentIngressMachineImage.CreationDate = aws.StringValue(availableAwsImage.CreationDate)
-					currentIngressMachineImage.Region = region
-				} else if currentIngressMachineImage != (CurrentMachineImage{}) {
-					currentDate, err := time.Parse(time.RFC3339, currentIngressMachineImage.CreationDate)
-					if err != nil {
-						fmt.Println("current: ", err)
-					}
-
-					candidateDate, err := time.Parse(time.RFC3339, aws.StringValue(availableAwsImage.CreationDate))
-					if err != nil {
-						fmt.Println("candidate: ", err)
-					}
-
-					if currentDate.Before(candidateDate) {
-						currentIngressMachineImage.Ami = aws.StringValue(availableAwsImage.ImageId)
-						currentIngressMachineImage.CreationDate = aws.StringValue(availableAwsImage.CreationDate)
-						currentIngressMachineImage.Region = region
-					}
-				}
-			}*/
 		}
 	}
 
@@ -339,7 +292,6 @@ func CreateAwsSession(region string) error {
 	}
 
 	_, err = sess.Config.Credentials.Get()
-	fmt.Println("SESSION REGION", aws.StringValue(sess.Config.Region))
 	if err != nil {
 		fmt.Printf("Session credentials not found: %s\n", err.Error())
 		return err
@@ -387,6 +339,7 @@ func main() {
 	}*/
 
 	for _, region := range r.Regions { //for _, region := range regions {
+		fmt.Printf("Create mapping for region: %s\n", region.RegionName)
 		err := CreateAwsSession(region.RegionName)
 		// err := CreateAwsSession(region)
 		if err != nil {
@@ -403,10 +356,11 @@ func main() {
 		if err != nil {
 			os.Exit(1)
 		}
+		fmt.Printf("Create mapping for region: %s --> Done\n", region.RegionName)
 	}
+
 	err = PrettyPrint(mis)
 	if err != nil {
 		return
 	}
-	// fmt.Println(mis, len(mis))
 }
