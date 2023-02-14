@@ -18,7 +18,7 @@ variable "f5xc_ce_machine_image" {
         {{- end}}
       }
       ingress_egress_gateway = {
-        {{- range $key, $val := .ingress_gateway}}
+        {{- range $key, $val := .ingress_egress_gateway}}
         {{$key}} = "{{$val.ami}}"
         {{- end}}
       }

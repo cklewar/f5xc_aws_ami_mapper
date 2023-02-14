@@ -302,19 +302,19 @@ func (r *CertifiedHardwareImages) Contains(mis MachineImages, dai AvailableAwsIm
 
 	for _, availableAwsImage := range dai {
 		for _, certifiedHardwareImageId := range r.CertifiedHardware.AwsByolMultiNicVoltmesh.Aws.ImageID {
-
 			_, err := build(&currentIngressEgressMachineImage, certifiedHardwareImageId, AvailableAwsImage(availableAwsImage), region)
 			if err != nil {
 				return nil, err
 			}
+
 		}
 
-		for _, certifiedHardwareImageId := range r.CertifiedHardware.AwsByolVoltmesh.Aws.ImageID {
+		/*for _, certifiedHardwareImageId := range r.CertifiedHardware.AwsByolVoltmesh.Aws.ImageID {
 			_, err := build(&currentIngressMachineImage, certifiedHardwareImageId, AvailableAwsImage(availableAwsImage), region)
 			if err != nil {
 				return nil, err
 			}
-		}
+		}*/
 
 	}
 
@@ -360,23 +360,21 @@ func main() {
 	mis[IngressEgressGatewayType] = make(map[string]map[string]string)
 	mis[IngressEgressGatewayVolstackType] = make(map[string]map[string]string)
 
-	for _, region := range r.Regions { //for _, region := range regions {
+	for _, region := range r.Regions {
 		fmt.Printf("Create mapping for region: %s\n", region.RegionName)
+		dai, err := DescribeAwsImages(region.RegionName)
 		if err != nil {
 			os.Exit(1)
 		}
 
-		dai, err1 := DescribeAwsImages(region.RegionName)
+		_, err1 := certifiedHardwareImages.Contains(mis, dai, region.RegionName)
 		if err1 != nil {
-			os.Exit(1)
-		}
-
-		_, err = certifiedHardwareImages.Contains(mis, dai, region.RegionName)
-		if err != nil {
 			os.Exit(1)
 		}
 		fmt.Printf("Create mapping for region: %s --> Done\n", region.RegionName)
 	}
+
+	fmt.Println(mis["ingress_egress_gateway"])
 
 	if *writeHclFile {
 		mis.ExportMachineImages2Hcl(settings.MachineImagesFile, settings.TemplateFile)
