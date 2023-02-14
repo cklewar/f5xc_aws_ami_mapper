@@ -60,7 +60,7 @@ type CurrentMachineImage struct {
 type Settings struct {
 	CertifiedHardwareUrl string `json:"certifiedHardwareUrl"`
 	AwsRegionsFile       string `json:"awsRegionsFile"`
-	MappingsFile         string `json:"mappingsFile""`
+	MappingsFile         string `json:"mappingsFile"`
 	TemplateFile         string `json:"templateFile"`
 	MachineImagesFile    string `json:"machineImagesFile"`
 }
@@ -309,12 +309,12 @@ func (r *CertifiedHardwareImages) Contains(mis MachineImages, dai AvailableAwsIm
 
 		}
 
-		/*for _, certifiedHardwareImageId := range r.CertifiedHardware.AwsByolVoltmesh.Aws.ImageID {
+		for _, certifiedHardwareImageId := range r.CertifiedHardware.AwsByolVoltmesh.Aws.ImageID {
 			_, err := build(&currentIngressMachineImage, certifiedHardwareImageId, AvailableAwsImage(availableAwsImage), region)
 			if err != nil {
 				return nil, err
 			}
-		}*/
+		}
 
 	}
 
@@ -373,8 +373,6 @@ func main() {
 		}
 		fmt.Printf("Create mapping for region: %s --> Done\n", region.RegionName)
 	}
-
-	fmt.Println(mis["ingress_egress_gateway"])
 
 	if *writeHclFile {
 		mis.ExportMachineImages2Hcl(settings.MachineImagesFile, settings.TemplateFile)
