@@ -25,11 +25,11 @@ const AwsByolMultiNicVoltmesh = "AwsByolMultiNicVoltmesh"
 const AwsByolVoltmesh = "AwsByolVoltmesh"
 const IngressGatewayType = "ingress_gateway"
 const IngressEgressGatewayType = "ingress_egress_gateway"
-const IngressEgressGatewayVolstackType = "ingress_egress_voltstack_gateway"
+const VolstackType = "voltstack_gateway"
 
 var AwsType2GwTypeMap = map[string]string{
 	AwsByolVoltmesh:         IngressGatewayType,
-	AwsByolVoltstackCombo:   IngressEgressGatewayVolstackType,
+	AwsByolVoltstackCombo:   VolstackType,
 	AwsByolMultiNicVoltmesh: IngressEgressGatewayType,
 }
 
@@ -297,10 +297,19 @@ func build(currentMachineImage *CurrentMachineImage, certifiedHardwareImageId st
 }
 
 func (r *CertifiedHardwareImages) Contains(mis MachineImages, dai AvailableAwsImages, region string) (MachineImages, error) {
+	var currentVoltstackMachineImage CurrentMachineImage
 	var currentIngressEgressMachineImage CurrentMachineImage
 	var currentIngressMachineImage CurrentMachineImage
 
 	for _, availableAwsImage := range dai {
+		for _, certifiedHardwareImageId := range r.CertifiedHardware.AwsByolVoltstackCombo.Aws.ImageID {
+			_, err := build(&currentVoltstackMachineImage, certifiedHardwareImageId, AvailableAwsImage(availableAwsImage), region)
+			if err != nil {
+				return nil, err
+			}
+
+		}
+
 		for _, certifiedHardwareImageId := range r.CertifiedHardware.AwsByolMultiNicVoltmesh.Aws.ImageID {
 			_, err := build(&currentIngressEgressMachineImage, certifiedHardwareImageId, AvailableAwsImage(availableAwsImage), region)
 			if err != nil {
@@ -318,6 +327,9 @@ func (r *CertifiedHardwareImages) Contains(mis MachineImages, dai AvailableAwsIm
 
 	}
 
+	mis[AwsType2GwTypeMap[AwsByolVoltstackCombo]][region] = make(map[string]string)
+	mis[AwsType2GwTypeMap[AwsByolVoltstackCombo]][region]["creationDate"] = currentVoltstackMachineImage.CreationDate
+	mis[AwsType2GwTypeMap[AwsByolVoltstackCombo]][region]["ami"] = currentVoltstackMachineImage.Ami
 	mis[AwsType2GwTypeMap[AwsByolMultiNicVoltmesh]][region] = make(map[string]string)
 	mis[AwsType2GwTypeMap[AwsByolMultiNicVoltmesh]][region]["creationDate"] = currentIngressEgressMachineImage.CreationDate
 	mis[AwsType2GwTypeMap[AwsByolMultiNicVoltmesh]][region]["ami"] = currentIngressEgressMachineImage.Ami
@@ -358,7 +370,7 @@ func main() {
 	mis = make(map[string]map[string]map[string]string)
 	mis[IngressGatewayType] = make(map[string]map[string]string)
 	mis[IngressEgressGatewayType] = make(map[string]map[string]string)
-	mis[IngressEgressGatewayVolstackType] = make(map[string]map[string]string)
+	mis[VolstackType] = make(map[string]map[string]string)
 
 	for _, region := range r.Regions {
 		fmt.Printf("Create mapping for region: %s\n", region.RegionName)

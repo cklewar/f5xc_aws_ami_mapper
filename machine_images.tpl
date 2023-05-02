@@ -10,6 +10,11 @@ variable "f5xc_ce_machine_image" {
         {{$key}} = string
         {{- end}}
     })
+    voltstack_gateway = object({
+        {{- range $key, $val := .voltstack_gateway}}
+        {{$key}} = string
+        {{- end}}
+    })
   })
    default = {
       ingress_gateway = {
@@ -19,6 +24,11 @@ variable "f5xc_ce_machine_image" {
       }
       ingress_egress_gateway = {
         {{- range $key, $val := .ingress_egress_gateway}}
+        {{$key}} = "{{$val.ami}}"
+        {{- end}}
+      }
+      voltstack_gateway = {
+        {{- range $key, $val := .voltstack_gateway}}
         {{$key}} = "{{$val.ami}}"
         {{- end}}
       }
