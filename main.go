@@ -285,6 +285,8 @@ func build(currentMachineImage *CurrentMachineImage, certifiedHardwareImageId st
 				fmt.Println("candidate: ", err)
 			}
 
+			//fmt.Printf("Current: %s Candiate: %s CureentDate is before: %t\n", currentDate, candidateDate, currentDate.Before(candidateDate))
+
 			if currentDate.Before(candidateDate) {
 				currentMachineImage.Ami = aws.StringValue(availableAwsImage.ImageId)
 				currentMachineImage.CreationDate = aws.StringValue(availableAwsImage.CreationDate)
@@ -315,7 +317,6 @@ func (r *CertifiedHardwareImages) Contains(mis MachineImages, dai AvailableAwsIm
 			if err != nil {
 				return nil, err
 			}
-
 		}
 
 		for _, certifiedHardwareImageId := range r.CertifiedHardware.AwsByolVoltmesh.Aws.ImageID {
@@ -324,7 +325,6 @@ func (r *CertifiedHardwareImages) Contains(mis MachineImages, dai AvailableAwsIm
 				return nil, err
 			}
 		}
-
 	}
 
 	mis[AwsType2GwTypeMap[AwsByolVoltstackCombo]][region] = make(map[string]string)
